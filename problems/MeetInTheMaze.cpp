@@ -168,8 +168,34 @@ vector< pair<int, int> > R, F, L;
 int d[50][50];
 
 long long shortestPaths(int r, int f) {
-    priority_queue< pair < int, pair <int, int > > q;
-    for (int i = 0)
+    priority_queue< pair< int, pair <int, int > >, vector< pair<int, pair<int, int> > >, greater< pair<int, pair<int, int> > > > q;
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            d[i][j] = dist[R[r].first][R[r].second][i][j] + dist[F[f].first][F[f].second][i][j];
+            q.push(  make_pair(d[i][j], make_pair(i, j) )  );
+        }
+    }
+    
+    while (q.size()) {
+        int cd = q.top().first, ci = q.top().second.first, cj = q.top().second.second;
+        q.pop();
+        
+        if (cd > d[ci][cj]) continue;
+        for (int k = 0; k < 4; ++k) {
+            int ni = ci + di[k];
+            int nj = cj + dj[k];
+            if (valid(ni, nj) and d[ci][cj] + 1 < d[ni][nj]) {
+                d[ni][nj] = d[ci][cj] + 1;
+                q.push(   make_pair(d[ni][nj],   make_pair(ni, nj))  );
+            }
+        }
+    }
+    
+    long long ans = 0;
+    for (int l = 0; l < L.size(); ++l) {
+        ans += d[L[l].first][L[l].second];
+    }
+    return ans;
 }
 
 string MeetInTheMaze::getExpected(vector <string> _maze) {
@@ -189,7 +215,6 @@ string MeetInTheMaze::getExpected(vector <string> _maze) {
             for (int ii = 0; ii < rows; ++ii) {
                 for (int jj = 0; jj < cols; ++jj) {
                     if (valid(i, j) and valid(ii, jj) and maze[i][j] != '.' and maze[ii][jj] != '.' and dist[i][j][ii][jj] >= (1 << 14)) {
-                        //printf("Can't reach from <%d, %d> (%c) to <%d, %d> (%c)\n", i, j, maze[i][j], ii, jj, maze[ii][jj]);
                         return "";
                     }
                 }
